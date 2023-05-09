@@ -1,0 +1,75 @@
+- name: Add Docker repository to DNF
+  vars:
+    ansible_docker_gpg_key_url: "{{ docker_gpg_key_url }}"
+    ansible_docker_repo_url: "{{ docker_repo_url }}"
+  command: 'sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo'
+  become: true
+  become_user: root
+  become_method: sudo
+  become_flags: '-H -S -n'
+  changed_when: false
+
+- name: Install pip
+  yum:
+    name:
+      - python3-devel
+      - gcc
+      - openssl-devel
+    state: present
+
+- name: Download get-pip.py script
+  get_url:
+    url: https://bootstrap.pypa.io/get-pip.py
+    dest: /tmp/get-pip.py
+
+- name: Install pip
+  command: python3 /tmp/get-pip.py
+  args:
+    creates: /usr/local/bin/pip
+
+- name: Install Docker packages
+  dnf:
+    name:
+      - dnf-plugins-core
+      - containerd.io
+      - docker-ce
+      - docker-ce-cli
+    state: present
+  notify: Start Docker
+
+- name: Add Docker GPG key
+  get_url:
+    url: "{{ ansible_docker_gpg_key_url }}"
+    dest: /tmp/docker_gpg_key
+  become: true
+  notify: Add Docker Repository
+
+- name: Include Docker Repository task
+  include_tasks: handlers/add_docker_repo.yml
+
+- name: Add Docker Repository
+  copy:
+    src: /etc/ansible/roles/rancher/files/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+  become: true
+  notify: Install Docker
+
+- name: Start Docker
+  include_tasks: handlers/start_docker.yml
+
+- name: Create Rancher directory
+  file:
+    path: "{{ rancher_dir }}"
+    state: directory
+
+- name: Run Rancher container
+  docker_container:
+    name: rancher
+    image: rancher/rancher
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - "{{ rancher_dir }}:/var/lib/rancher"
+    restart_policy: unless-stopped
+

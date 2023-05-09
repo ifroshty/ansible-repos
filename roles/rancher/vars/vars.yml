@@ -1,0 +1,3 @@
+ansible_docker_gpg_key_url: https://download.docker.com/linux/centos/gpg
+ansible_docker_repo_url: https://download.docker.com/linux/centos/docker-ce.repo
+rancher_dir: /opt/rancher

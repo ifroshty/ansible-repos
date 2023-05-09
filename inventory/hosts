@@ -1,0 +1,3 @@
+[main]
+rancher.technaranjo.com ansible_ssh_user=root ansible_ssh_private_key_file=/etc/ansible/keys/OpenSSH_Private
+
