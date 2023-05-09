@@ -2,5 +2,7 @@
 - hosts: main
   vars_files: 
     - /etc/ansible/roles/rancher/vars/vars.yml
+    - /etc/ansible/roles/docker/vars/vars.yml 
   roles:
-    - rancher
+    #- rancher
+    - docker  
