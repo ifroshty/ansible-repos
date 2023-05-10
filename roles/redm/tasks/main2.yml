@@ -1,0 +1,104 @@
+- name: Install Required Packages
+  vars:
+    ansible_nodejs_url: "{{ ansible_nodejs_url }}"
+    ansible_txadmin_url: "{{ ansible_txadmin_url }}"
+    ansible_fxserver_url: "{{ ansible_fxserver_url }}"  
+  dnf:
+    name:
+      - curl
+      - wget
+      - unzip
+      - tar
+      - make
+      - automake
+      - gcc-c++
+      - git
+      - glibc-devel
+    state: present
+
+- name: Create directory for FiveM Server
+  file:
+    path: /opt/FXServer/server
+    state: directory
+
+- name: Navigate to FiveM  Directory
+  become: true
+  shell: cd /opt/FXServer/server
+
+
+- name: Download FiveM
+  get_url:
+    url: "{{ ansible_fxserver_url }}"
+    dest: /opt/FXServer/server
+
+- name: Unzip txAdmin
+  unarchive:
+    src: /opt/FXServer/server/fx.tar.xz
+    dest: /opt/FXServer/server
+    remote_src: yes
+
+- name: Run FXServer
+  become: true
+  command: /opt/FXServer/server/run.sh
+
+      #- name: Install Node.js
+      #  shell: |
+      #    curl -sL "{{ ansible_nodejs_url }}" | sudo bash -
+      #    dnf install -y nodejs
+      #
+      #- name: Create directory for txAdmin
+      #  file:
+      #    path: /opt/txadmin
+      #    state: directory
+      #
+      #- name: Navigate to txAdmin dir
+      #  become: true
+      #  shell: cd /opt/txadmin
+      #
+      #- name: Download txAdmin
+      #  get_url:
+      #    url: "{{ ansible_txadmin_url }}"
+      #    dest: /opt/txadmin/txadmin.zip
+      #
+      #- name: Unzip txAdmin
+      #  unarchive:
+      #    src: /opt/txadmin/txadmin.zip
+      #    dest: /opt/txadmin/
+      #    remote_src: yes
+      #
+      #- name: Navigate to txAdmin directory
+      #  become: true
+      #  shell:
+      #    cmd: pwd
+      #    chdir: /opt/txadmin/txAdmin-5.2.0
+      #
+      #- name: Install Node.js packages
+      #  npm:
+      #    path: /opt/txadmin/txAdmin-5.2.0
+      #    state: present
+      #
+      #- name: Copy default configuration file
+      #  copy:
+      #    src: /opt/txadmin/txAdmin-5.2.0/config.example.json
+      #    dest: /opt/txadmin/txAdmin-5.2.0/config.json
+      #
+      #- name: Edit configuration file
+      #  become: true
+      #  lineinfile:
+      #    path: /opt/txadmin/txAdmin-5.2.0/config.json
+      #    regexp: '{{ item.regexp }}'
+      #    line: '{{ item.line }}'
+      #  with_items:
+      #    - { regexp: 'auth.disableLogin": false,', line: 'auth.disableLogin": false,',}
+      #    - { regexp: 'auth.sessionSecret": "",', line: 'auth.sessionSecret": "tEHRxdj5kbz#d778D6cp",',}
+      #    - { regexp: 'monitor.autoStartResource": true,', line: 'monitor.autoStartResource": true,',}
+      #    - { regexp: 'monitor.restartDelay": 10,', line: 'monitor.restartDelay": 10,',}
+      #    - { regexp: 'monitor.restartAttempts": 5,', line: 'monitor.restartAttempts": 5,',}
+      #    - { regexp: 'monitor.restartThreshold": 60,', line: 'monitor.restartThreshold": 60,',}
+      #    - { regexp: 'monitor.resourceRestarter": "basic",', line: 'monitor.resourceRestarter": "basic",',}
+      #    - { regexp: 'webServer.port": 40120,', line: 'webServer.port": 40120,',}
+      #    - { regexp: 'webServer.disableUpdater": false,', line: 'webServer.disableUpdater": false,',}
+      #    - { regexp: 'webServer.updateInterval": 60,', line: 'webServer.updateInterval": 60,',}
+      #    - { regexp: 'webServer.disableCommands": false,', line: 'webServer.disableCommands": false,',}
+      #    - { regexp: 'webServer.disableConsole": true,', line: 'webServer.disableConsole": true,',}
+

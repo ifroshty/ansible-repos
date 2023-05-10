@@ -1,0 +1,3 @@
+ansible_nodejs_url: https://rpm.nodesource.com/setup_20.x
+ansible_txadmin_url: https://github.com/tabarra/txAdmin/archive/refs/tags/v5.2.0.zip
+ansible_fxserver_url: https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/5848-4f71128ee48b07026d6d7229a60ebc5f40f2b9db/fx.tar.xz
