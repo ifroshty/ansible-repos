@@ -1,6 +1,6 @@
 [main]
-rancher.technaranjo.com ansible_ssh_user=root ansible_ssh_private_key_file=/.ssh/OpenSSH_Private2
+rancher.technaranjo.com ansible_ssh_user=root ansible_ssh_private_key_file=~/.ssh/Hetzner_Private_OpenSSH
 
 
 [gameserver]
-neweden.technaranjo.com ansible_ssh_user=root ansible_ssh_private_key_file=~/.ssh/OpenSSH_Private2
+neweden.technaranjo.com ansible_ssh_user=root ansible_ssh_private_key_file=~/.ssh/Hetzner_Private_OpenSSH
