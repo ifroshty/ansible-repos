@@ -1,6 +1,15 @@
+---
+
+#- name: Configure SSH
+#  vars_files:
+#    - secrets.yml
+#  user:
+#    name: root
+#    key: "{{ hertzner_ssh_key }}"
+
 - name: Install Required Packages
   vars:
-   ansible_fxserver_url: "{{ ansible_fxserver_url }}"
+    ansible_fxserver_url: "{{ ansible_fxserver_url }}"
   package:
     name:
       - curl
@@ -13,11 +22,13 @@
       - git
       - glibc-devel
     state: present
+  when: ansible_pkg_mgr == 'dnf' or ansible_pkg_mgr == 'yum'
 
 - name: Create directory for FXServer
   file:
     path: /opt/FXServer/server
     state: directory
+  
 
 - name: Download FXServer archive
   get_url:
@@ -30,8 +41,4 @@
     dest: /opt/FXServer/server
     remote_src: yes
     creates: /opt/FXServer/server/run.sh
-
-      #- name: Run FXServer
-      #become: true
-      #command: /opt/FXServer/server/run.sh &
 
