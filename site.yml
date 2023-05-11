@@ -1,11 +1,13 @@
 ---
-- hosts: gameserver
+- hosts: main
   vars_files: 
     #- /etc/ansible/roles/rancher/vars/vars.yml
     #- /etc/ansible/roles/docker/vars/vars.yml
-    - /etc/ansible/roles/redm/vars/vars.yml  
+    #- /etc/ansible/roles/redm/vars/vars.yml  
+    - /etc/ansible/roles/portainer/vars/vars.yml
   roles:
     #- rancher
     #- docker
-    - redm
+    #- redm
+    - portainer
 

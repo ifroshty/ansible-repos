@@ -1,0 +1,66 @@
+- name: Add Docker repository to DNF
+  vars:
+    ansible_docker_gpg_key_url: "{{ docker_gpg_key_url }}"
+    ansible_docker_repo_url: "{{ docker_repo_url }}"
+  command: 'sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo'
+  become: true
+  become_user: root
+  become_method: sudo
+  become_flags: '-H -S -n'
+  changed_when: false
+
+- name: Install Docker packages
+  dnf:
+    name:
+      - dnf-plugins-core
+      - containerd.io
+      - docker-ce
+      - docker-ce-cli
+      - pip  
+    state: present
+  notify: Start Docker
+
+- name: Install docker via pip
+  pip:
+    name:
+      - docker
+      - docker-compose 
+    executable: pip3  
+    state: present  
+
+- name: Add Docker GPG key
+  get_url:
+    url: "{{ ansible_docker_gpg_key_url }}"
+    dest: /tmp/docker_gpg_key
+  become: true
+  notify: Add Docker Repository
+
+- name: Include Docker Repository task
+  include_tasks: handlers/add_docker_repo.yml
+
+- name: Add Docker Repository
+  copy:
+    src: /etc/ansible/roles/rancher/files/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+  become: true
+  notify: Install Docker
+
+- name: Start Docker
+  include_tasks: handlers/start_docker.yml
+
+- name: Create portainer_data volume
+  docker_volume:
+    name: portainer_data
+
+- name: Run portainer container
+  docker_container:
+    name: portainer
+    image: portainer/portainer-ce:latest
+    restart_policy: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "8000:8000"
+      - "9443:9443"  
+
