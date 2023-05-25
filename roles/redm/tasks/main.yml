@@ -1,15 +1,9 @@
 ---
-
-#- name: Configure SSH
-#  vars_files:
-#    - secrets.yml
-#  user:
-#    name: root
-#    key: "{{ hertzner_ssh_key }}"
-
 - name: Install Required Packages
+  
   vars:
     ansible_fxserver_url: "{{ ansible_fxserver_url }}"
+
   package:
     name:
       - curl
@@ -42,3 +36,68 @@
     remote_src: yes
     creates: /opt/FXServer/server/run.sh
 
+- name: Delete old monitor files
+  command: rm -rfv /opt/FXServer/server/alpine/opt/cfx-server/citizen/system_resources/monitor/*
+  args:
+    warn: no
+
+- name: Download new monitor version
+  get_url:
+    url: "https://github.com/tabarra/txAdmin/releases/download/v6.0.0/monitor.zip"
+    dest: /opt/FXServer/server/alpine/opt/cfx-server/citizen/system_resources/monitor
+
+- name: Extract monitor archive to folder
+  unarchive:
+    src: /opt/FXServer/server/alpine/opt/cfx-server/citizen/system_resources/monitor/monitor.zip
+    dest: /opt/FXServer/server/alpine/opt/cfx-server/citizen/system_resources/monitor/
+    remote_src: yes
+    
+- name: Create folder for server data repo clone
+  file:
+    path: /opt/FXServer/server-data
+    state: directory  
+
+- name: Clone cfx-server-data repo
+  git:
+    repo: https://github.com/citizenfx/cfx-server-data.git
+    dest: /opt/FXServer/server-data
+
+- name: Create REDEMRP folder
+  file:
+    path: "/opt/FXServer/server-data/resources/[REDEMRP]"
+    state: directory
+
+- name: Download required RedM:RP files
+  get_url:
+    url: "{{ item }}"
+    dest: "/opt/FXServer/server-data/resources/[REDEMRP]/"
+  loop: "{{ urls }}"
+  vars:
+    urls:
+      - https://github.com/RedEM-RP/redem_roleplay/archive/refs/tags/1.1.2.tar.gz
+      - https://github.com/overextended/oxmysql/releases/download/v2.6.0/oxmysql.zip
+      - https://github.com/RedEM-RP/redemrp_charselect/archive/refs/tags/2023.01.tar.gz
+      - https://github.com/RedEM-RP/redemrp_respawn/archive/refs/tags/2023.01.tar.gz
+
+- name: Find zip and tar.gz files
+  find:
+    paths: "/opt/FXServer/server-data/resources/[REDEMRP]"
+    patterns:
+      - "*.zip"
+      - "*.tar.gz"
+  register: found_files_results
+
+- name: Set found files
+  set_fact:
+    found_files: "{{ found_files_results.files }}"
+
+
+
+- name: Unarchive RedM:RP files
+  unarchive:
+    src: "{{ item.path }}"
+    dest: "/opt/FXServer/server-data/resources/[REDEMRP]"
+    remote_src: yes
+  loop: "{{ found_files }}"
+
+  
